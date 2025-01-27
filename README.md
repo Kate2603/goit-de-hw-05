@@ -1,65 +1,137 @@
 # goit-de-hw-05
 
+Ось короткий опис кожного з етапів виконання завдання:
+
+1 Створення топіків в Kafka
+На цьому етапі ми створили три топіки в Kafka, які будуть використовуватися для зберігання даних та сповіщень. Імена топіків повинні містити ваші імена або інші ідентифікатори, щоб уникнути дублювання.
+
+Топік building_sensors: Використовується для зберігання даних з усіх датчиків.
+Топік temperature_alerts: Використовується для зберігання сповіщень про перевищення допустимого рівня температури.
+Топік humidity_alerts: Використовується для зберігання сповіщень про вихід рівня вологості за допустимі рамки.
+
+2 Відправка даних до топіків
+На цьому етапі ми написали Python-скрипт, який імітує роботу датчика. Скрипт періодично відправляє випадково згенеровані дані (температуру та вологість) у топік building_sensors.
+
+Дані: Скрипт генерує дані, які містять:
+Ідентифікатор датчика (постійний для одного запуску, але може змінюватися при повторному запуску).
+Час отримання даних.
+Випадкові показники температури (від 25 до 45 градусів) та вологості (від 15 до 85%).
+Запуск скрипту: Для імітації декількох датчиків, скрипт потрібно запускати кілька разів.
+
+3 Обробка даних
+На цьому етапі ми написали Python-скрипт, який підписується на топік building_sensors і обробляє отримані дані.
+
+Перевірка даних:
+Якщо температура перевищує 40°C, генерується сповіщення, яке відправляється в топік temperature_alerts.
+Якщо вологість перевищує 80% або менше 20%, генерується сповіщення, яке відправляється в топік humidity_alerts.
+Сповіщення: Сповіщення повинні містити:
+Ідентифікатор датчика.
+Значення показників (температура та вологість).
+Час отримання даних.
+Повідомлення про перевищення порогового значення.
+
+4 Остаточні дані
+На цьому етапі ми написали Python-скрипт, який підписується на топіки temperature_alerts та humidity_alerts і зчитує сповіщення.
+
+Виведення на екран: Скрипт виводить на екран отримані сповіщення, що дозволяє вам бачити, коли відбуваються перевищення температури або вологості.
+Підсумок
+Ці етапи описують процес створення системи для моніторингу даних з датчиків, обробки цих даних та генерації сповіщень у разі перевищення порогових значень.
+
 Кроки для запуску
+
+Все відкриваємо в терміналі WSL
+
+## Завантажте Kafka: Якщо ви ще не завантажили Kafka, ви можете зробити це за допомогою команди wget або просто завантажити його з офіційного сайту Apache Kafka
+
+wget https://downloads.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz
+
+- Розпакуйте Kafka
+
+tar -xzf kafka_2.13-3.9.0.tgz
+
+- Перейдіть до каталогу Kafka
+
+cd kafka_2.13-3.9.0
 
 ## 1 У першому терміналі запустіть Zookeeper
 
-- В терміналі ПК
-
-cd C:\kafka\kafka_2.12-3.8.0\bin\windows
-.\zookeeper-server-start.bat ..\..\config\zookeeper.properties
+cd kafka_2.13-3.9.0
+bin/zookeeper-server-start.sh config/zookeeper.properties
 
 ## 2 У другому терміналі запустіть Kafka сервер
 
-cd C:\kafka\kafka_2.12-3.8.0\bin\windows
-.\kafka-topics.bat --list --bootstrap-server localhost:9092
+cd kafka_2.13-3.9.0
+bin/kafka-server-start.sh config/server.properties
 
 ## 3 Створіть топіки
 
-cd C:\kafka\kafka_2.12-3.8.0\bin\windows
-.\kafka-topics.bat --create --topic alex_building_sensors --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-.\kafka-topics.bat --create --topic alex_temperature_alerts --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-.\kafka-topics.bat --create --topic alex_humidity_alerts --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+cd kafka_2.13-3.9.0
+
+- Створення топіка building_sensors
+
+  bin/kafka-topics.sh --create --topic building_sensors_alex --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+- Створення топіка temperature_alerts
+
+  bin/kafka-topics.sh --create --topic temperature_alerts_alex --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+- Створення топіка humidity_alerts
+
+  bin/kafka-topics.sh --create --topic humidity_alerts_alex --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+
+  bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+## Встановлення python3
+
+cd kafka_2.13-3.9.0
+
+sudo apt install python3
+
+## Встановлення віртуальні середовища
+
+sudo apt install python3-venv
+
+source venv/bin/activate
+
+pip install -r requirements.txt
+
+або
+
+pip install confluent-kafka
+
+python -c "import confluent_kafka; print(confluent_kafka.**version**)"
 
 ## 4 Запустіть продюсера
 
-- Відкрийте новий термінал ВС Коду і запустіть sensor_producer.py:
+- Відкрийте новий термінал WSL і запустіть :
 
-python sensor_producer.py
+python /mnt/c/Users/user/Documents/GitHub/goit-de-hw-05/sensor_data_sender.py
 
 ## 5 Запустіть споживача для сповіщень
 
-- Відкрийте ще один термінал і запустіть alert_consumer.py:
+- Відкрийте ще один термінал і запустіть:
 
-python alert_consumer.py
+python /mnt/c/Users/user/Documents/GitHub/goit-de-hw-05/data_processor.py
 
 ## 6 Запустіть споживача для даних з датчиків
 
--Відкрийте ще один термінал і запустіть alert_consumer.py:
+-Відкрийте ще один термінал і запустіть:
 
-python alert_consumer.py
+python /mnt/c/Users/user/Documents/GitHub/goit-de-hw-05/alert_listener.py
 
-## 7 Запустіть споживача для даних з датчиків
+### Ось отримані результати
 
-- Відкрийте ще один термінал і запустіть sensor_consumer.py:
+- скрин трьох топіків з команди [print(topic) for topic in admin_client.list_topics() if "my_name" in topic]
+  ![alt text](img/1.jpg)
 
-python sensor_consumer.py
+- скрин генерації даних сенсорів та відправки даних в building_sensors з демонстрацією двох (або більше) одночасних роботи двох запусків програми
+  ![alt text](img/2.jpg)
 
-Перевірте топіки:
+- скрин отримання даних та фільтрації саме тих даних, що будуть далі використані
+  ![alt text](img/3.jpg)
 
-## Виконайте команду для переліку топіків, щоб переконатися, що вони існують
+- скрин з демонстрацією того, що відфільтровані дані були послані у відповідні топіки
+  ![alt text](img/4.jpg)
 
-- В терміналі ПК
-
-cd C:\kafka\kafka_2.12-3.8.0\bin\windows
-.\kafka-topics.bat --list --bootstrap-server localhost:9092
-
-### Перевірка роботи
-
-Переконайтеся, що всі три скрипти працюють:
-
-- sensor_producer.py повинен надсилати дані до топіка your_name_building_sensors кожні 5 секунд.
-
-- sensor_consumer.py повинен отримувати дані з топіка your_name_building_sensors і перевіряти умови для температури та вологості.
-
-- alert_consumer.py повинен отримувати сповіщення з топіків your_name_temperature_alerts і your_name_humidity_alerts.
+- скрин з результатом запису відфільтрованих даних
+  ![alt text](img/5.jpg)
